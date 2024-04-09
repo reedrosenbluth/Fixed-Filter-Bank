@@ -1,0 +1,138 @@
+
+graph FFB  [[main]]
+{
+    input  stream float<2> audioIn;
+    output stream float<2> audioOut;
+
+    // pan and amp controls for each band
+    input event float panBand0 [[name: "Pan 1", min: -1.0, max: 1.0, init: 0.0]];
+    input event float panBand1 [[name: "Pan 2", min: -1.0, max: 1.0, init: 0.0]];
+    input event float panBand2 [[name: "Pan 3", min: -1.0, max: 1.0, init: 0.0]];
+    input event float panBand3 [[name: "Pan 4", min: -1.0, max: 1.0, init: 0.0]];
+    input event float panBand4 [[name: "Pan 5", min: -1.0, max: 1.0, init: 0.0]];
+    input event float panBand5 [[name: "Pan 6", min: -1.0, max: 1.0, init: 0.0]];
+    input event float panBand6 [[name: "Pan 7", min: -1.0, max: 1.0, init: 0.0]];
+    input event float panBand7 [[name: "Pan 8", min: -1.0, max: 1.0, init: 0.0]];
+
+    input event float ampBand0 [[name: "Amp 1", min: 0.0, max: 1.0, init: 1.0]];
+    input event float ampBand1 [[name: "Amp 2", min: 0.0, max: 1.0, init: 1.0]];
+    input event float ampBand2 [[name: "Amp 3", min: 0.0, max: 1.0, init: 1.0]];
+    input event float ampBand3 [[name: "Amp 4", min: 0.0, max: 1.0, init: 1.0]];
+    input event float ampBand4 [[name: "Amp 5", min: 0.0, max: 1.0, init: 1.0]];
+    input event float ampBand5 [[name: "Amp 6", min: 0.0, max: 1.0, init: 1.0]];
+    input event float ampBand6 [[name: "Amp 7", min: 0.0, max: 1.0, init: 1.0]];
+    input event float ampBand7 [[name: "Amp 8", min: 0.0, max: 1.0, init: 1.0]];
+
+    node panners = PanMix[8];
+
+    node
+    {
+        filter0 = BandpassFilter(20.0f);
+        filter1 = BandpassFilter(40.0f);
+        filter2 = BandpassFilter(80.0f);
+        filter3 = BandpassFilter(160.0f);
+        filter4 = BandpassFilter(320.0f);
+        filter5 = BandpassFilter(640.0f);
+        filter6 = BandpassFilter(1280.0f);
+        filter7 = BandpassFilter(2560.0f);
+    }
+
+    connection
+    {
+        panBand0 -> panners[0].pan;
+        panBand1 -> panners[1].pan;
+        panBand2 -> panners[2].pan;
+        panBand3 -> panners[3].pan;
+        panBand4 -> panners[4].pan;
+        panBand5 -> panners[5].pan;
+        panBand6 -> panners[6].pan;
+        panBand7 -> panners[7].pan;
+
+        ampBand0 -> panners[0].amp;
+        ampBand1 -> panners[1].amp;
+        ampBand2 -> panners[2].amp;
+        ampBand3 -> panners[3].amp;
+        ampBand4 -> panners[4].amp;
+        ampBand5 -> panners[5].amp;
+        ampBand6 -> panners[6].amp;
+        ampBand7 -> panners[7].amp;
+    }
+
+    // TODO: should the filters come before the panmixers?
+    connection
+    {
+        // send audio to filters in parallel
+        audioIn -> filter0.in,
+                   filter1.in,
+                   filter2.in,
+                   filter3.in,
+                   filter4.in,
+                   filter5.in,
+                   filter6.in,
+                   filter7.in;
+
+        // send each filter output to a panner
+        filter0.out -> panners[0].in;
+        filter1.out -> panners[1].in;
+        filter2.out -> panners[2].in;  
+        filter3.out -> panners[3].in;
+        filter4.out -> panners[4].in;
+        filter5.out -> panners[5].in;
+        filter6.out -> panners[6].in;
+        filter7.out -> panners[7].in;
+
+        // sum the output of the panners and adjust gain
+        (panners[0].out +
+         panners[1].out +
+         panners[2].out + 
+         panners[3].out + 
+         panners[4].out + 
+         panners[5].out +
+         panners[6].out +
+         panners[7].out ) / 2 -> audioOut;
+    }
+}
+
+processor BandpassFilter(float frequency)
+{
+    input stream float<2> in;
+    output stream float<2> out;
+
+    node filter = std::filters (float<2>)::tpt::svf::Processor (2, frequency);
+
+    void main()
+    {
+        loop
+        {
+            filter.in <- in;
+            filter.advance();
+            out <- filter.out;
+            advance();
+        }
+    }
+}
+
+processor PanMix 
+{
+    input event float pan [[name: "Pan", min: -1.0, max: 1.0, init: 0.0]];
+    input event float amp [[name: "Amp", min: 0.0, max: 1.0, init: 1.0]];
+
+    input stream float<2> in;
+    output stream float<2> out;
+
+    float panAmount;
+    float ampAmount;
+
+    event pan(float p) {panAmount = p;}
+    event amp(float a) {ampAmount = a;}
+
+    void main()
+    {
+        loop
+        {
+            float<2> gains = std::pan_law::linear (panAmount);
+            out <- float<2> (in[0] * gains[0] * ampAmount, in[1] * gains[1] * ampAmount);
+            advance();
+        }
+    }
+}
