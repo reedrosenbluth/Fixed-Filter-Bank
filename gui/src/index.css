@@ -1,0 +1,11 @@
+.freq-slider {
+  height: 100%;
+  width: 20px;
+  margin: 0;
+  -webkit-appearance: slider-vertical;
+  -moz-appearance: slider-vertical;
+  appearance: slider-vertical;
+  writing-mode: bt-lr;
+  -webkit-writing-mode: bt-lr;
+  -ms-writing-mode: bt-lr;
+}

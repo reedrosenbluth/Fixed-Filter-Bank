@@ -1,12 +1,17 @@
 {
-    "CmajorVersion":    1,
-    "ID":               "com.your_name.your_patch_ID",
-    "version":          "1.0",
-    "name":             "FFB",
-    "description":      "FFB",
-    "category":         "generator",
-    "manufacturer":     "Your Company Goes Here",
-    "isInstrument":     true,
-
-    "source":           "FFB.cmajor"
+  "CmajorVersion": 1,
+  "ID": "com.your_name.your_patch_ID",
+  "version": "1.0",
+  "name": "FFB",
+  "description": "FFB",
+  "category": "processor",
+  "manufacturer": "RR",
+  "isInstrument": false,
+  "source": "FFB.cmajor",
+  "view": {
+    "src": "gui/stripped-build/index.js",
+    "width": 1016,
+    "height": 516,
+    "resizable": false
+  }
 }

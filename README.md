@@ -1,3 +1,19 @@
-# Stereo Fixed Filter Bank
+# Fixed Filter Bank
 
-a stereo fixed filter bank with level and panning control for each filter bank. written in [Cmajor](https://cmajor.dev/).
+### How to run as a VST (recommended)
+
+1. Install the Cmajor VST/AU plugin: https://github.com/cmajor-lang/cmajor/releases
+2. Open your DAW and create a track with an instance of this plugin
+3. Drag `FFB.cmajorpatch` onto the plugin's GUI
+
+### How to run in VSCode
+
+1. Install VSCode https://code.visualstudio.com/
+2. Install the Cmajor VSCode plugin https://marketplace.visualstudio.com/items?itemName=CmajorSoftware.cmajor-tools
+3. Open FFB.cmajor in VSCode
+4. Open the VSCode command pallette `cmd-shift-P` and run the command `Cmajor: Run Patch`
+5. You can switch between the custom GUI (spectrogram) and the generated GUI that has controls for filter bank panning and amplitude.
+
+### Usage
+
+The project's GUI does not currently have controls for filter bank panning and amplitude, but rather serves as a visualizer. However, these controls should be exposed via the Cmajor VST/AU plugin.
