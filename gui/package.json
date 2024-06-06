@@ -6,8 +6,9 @@
   "homepage": "./",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "react-scripts start",
     "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build && npm run copy-build",
-    "copy-build": "rm -f stripped-build/index.html && rm -rf striped-build/static && cp -r build/index.html build/static ./stripped-build"
+    "copy-build": "rm -f stripped-build/index.html && rm -rf stripped-build/static && cp -r build/index.html build/static ./stripped-build"
   },
   "keywords": [],
   "author": "",

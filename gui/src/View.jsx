@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import "./index.css";
 
 const SpectrumAnalyzer = ({
   fftData,
@@ -70,54 +71,25 @@ const SpectrumAnalyzer = ({
       const labelWidth = width / (frequencyIntervals.length - 1);
 
       ctx.fillStyle = "white";
-      ctx.font = "18px Arial";
+      ctx.font = "20px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
       for (let i = 0; i < frequencyIntervals.length; i++) {
-        const labelText = `${frequencyIntervals[i]} Hz`;
+        const labelText = `${frequencyIntervals[i]}`;
         const labelX = i * labelWidth + 30;
-        const labelY = height - 20;
+        const labelY = height - 30;
 
         ctx.fillText(labelText, labelX, labelY);
       }
     };
 
-    const drawFilterLines = () => {
-      const width = canvas.width;
-      const height = canvas.height;
-      const barWidth = width / (frequencyIntervals.length - 1);
-
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 2;
-
-      for (let i = 0; i < filterFreqs.length; i++) {
-        const filterFreq = filterFreqs[i];
-        const amp = amps[i];
-
-        const filterIndex = frequencyIntervals.findIndex(
-          (freq) => freq >= filterFreq
-        );
-
-        if (filterIndex !== -1) {
-          const x = filterIndex * barWidth;
-          const y = height - amp * height;
-
-          ctx.beginPath();
-          ctx.moveTo(x, height);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-        }
-      }
-    };
-
     drawSpectrum(fftData);
-    drawFilterLines();
     drawFrequencyLabels();
   }, [fftData, sampleRate, frequencyIntervals, filterFreqs, amps]);
 
   return (
-    <div style={{ width: "1000px", height: "500px" }}>
+    <div>
       <canvas
         ref={canvasRef}
         width="2000"
@@ -131,19 +103,21 @@ const SpectrumAnalyzer = ({
 export default function View({ patchConnection }) {
   const [stateLoaded, setStateLoaded] = useState(false);
   const [fftData, setFFTData] = useState([]);
-  const frequencyIntervals = [
-    0, 20, 50, 100, 200, 500, 1000, 2000, 3000, 5000, 10000,
-  ];
 
-  const filterFreqs = [50, 100, 200, 500, 1000, 2000, 3000, 5000];
-  const [amps, setAmps] = useState([0, 0, 0, 0, 0, 0, 0, 0]);
+  const frequencyIntervals = [
+    0, 29, 61, 115, 218, 411, 777, 1500, 2800, 5200, 11000,
+  ];
+  const filterFreqs = [61, 115, 218, 411, 777, 1500, 2800, 5200];
+
+  const [amps, setAmps] = useState([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+  const [pans, setPans] = useState([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
 
   useEffect(() => {
     const handleDftOut = (event) => {
       setFFTData(event.magnitudes);
     };
 
-    const handleAmpChange = (event) => {
+    const handleControlChange = (event) => {
       const id = event.endpointID;
       const val = event.value;
       const index = parseInt(id.slice(-1));
@@ -154,47 +128,123 @@ export default function View({ patchConnection }) {
           newAmps[index] = val;
           return newAmps;
         });
+      } else if (id.slice(0, 3) === "pan") {
+        setPans((prevPans) => {
+          const newPans = [...prevPans];
+          newPans[index] = val;
+          return newPans;
+        });
       }
     };
 
-    if (patchConnection !== undefined) {
-      patchConnection.addEndpointListener("dftOut", handleDftOut);
-      patchConnection.addAllParameterListener(handleAmpChange);
+    patchConnection?.addEndpointListener("dftOut", handleDftOut);
+    patchConnection?.addAllParameterListener(handleControlChange);
 
-      if (!stateLoaded) {
-        patchConnection.requestParameterValue("ampBand0");
-        patchConnection.requestParameterValue("ampBand1");
-        patchConnection.requestParameterValue("ampBand2");
-        patchConnection.requestParameterValue("ampBand3");
-        patchConnection.requestParameterValue("ampBand4");
-        patchConnection.requestParameterValue("ampBand5");
-        patchConnection.requestParameterValue("ampBand6");
-        patchConnection.requestParameterValue("ampBand7");
-        setStateLoaded(true);
-      }
+    if (!stateLoaded) {
+      patchConnection?.requestParameterValue("ampBand0");
+      patchConnection?.requestParameterValue("ampBand1");
+      patchConnection?.requestParameterValue("ampBand2");
+      patchConnection?.requestParameterValue("ampBand3");
+      patchConnection?.requestParameterValue("ampBand4");
+      patchConnection?.requestParameterValue("ampBand5");
+      patchConnection?.requestParameterValue("ampBand6");
+      patchConnection?.requestParameterValue("ampBand7");
+
+      patchConnection?.requestParameterValue("panBand0");
+      patchConnection?.requestParameterValue("panBand1");
+      patchConnection?.requestParameterValue("panBand2");
+      patchConnection?.requestParameterValue("panBand3");
+      patchConnection?.requestParameterValue("panBand4");
+      patchConnection?.requestParameterValue("panBand5");
+      patchConnection?.requestParameterValue("panBand6");
+      patchConnection?.requestParameterValue("panBand7");
+
+      setStateLoaded(true);
     }
 
     return () => {
-      patchConnection.removeEndpointListener("dftOut", handleDftOut);
-      patchConnection.removeAllParameterListener(handleAmpChange);
+      patchConnection?.removeEndpointListener("dftOut", handleDftOut);
+      patchConnection?.removeAllParameterListener(handleControlChange);
     };
   }, [patchConnection, stateLoaded]);
 
-  const style = {
+  const containerStyle = {
     height: "500px",
     width: "1000px",
     background: "white",
   };
 
   return (
-    <div style={style}>
-      <SpectrumAnalyzer
-        fftData={fftData}
-        sampleRate={44100}
-        frequencyIntervals={frequencyIntervals}
-        filterFreqs={filterFreqs}
-        amps={amps}
-      />
+    <div style={containerStyle}>
+      <div
+        style={{
+          position: "relative",
+          height: "100%",
+          width: "100%",
+        }}
+      >
+        <SpectrumAnalyzer
+          fftData={fftData}
+          sampleRate={44100}
+          frequencyIntervals={frequencyIntervals}
+          filterFreqs={filterFreqs}
+          amps={amps}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
+        <div>
+          {amps.map((amp, i) => (
+            <div
+              style={{
+                position: "relative",
+                left: `${(i / amps.length) * 76.8 + 21.75}%`,
+              }}
+            >
+              <input
+                className="freq-slider"
+                type="range"
+                value={amp}
+                min={0.0}
+                max={1.0}
+                step={0.001}
+                onChange={(e) => {
+                  const newAmps = [...amps];
+                  newAmps[i] = e.target.value;
+                  setAmps(newAmps);
+                  patchConnection?.sendEventOrValue(
+                    `ampBand${i}`,
+                    e.target.value,
+                    100
+                  );
+                }}
+              />
+              <input
+                className="pan-slider"
+                type="range"
+                min={-1.0}
+                max={1.0}
+                step={0.001}
+                value={pans[i]}
+                onChange={(e) => {
+                  const newPans = [...pans];
+                  newPans[i] = e.target.value;
+                  setPans(newPans);
+                  patchConnection?.sendEventOrValue(
+                    `panBand${i}`,
+                    e.target.value,
+                    100
+                  );
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -10,38 +10,38 @@ namespace FixedFilterBank
         output dft.dftOut;
 
         // pan controls for each band
-        input event float panBand0 [[name: "Pan 1", min: -1.0, max: 1.0, init: 0.0]];
-        input event float panBand1 [[name: "Pan 2", min: -1.0, max: 1.0, init: 0.0]];
-        input event float panBand2 [[name: "Pan 3", min: -1.0, max: 1.0, init: 0.0]];
-        input event float panBand3 [[name: "Pan 4", min: -1.0, max: 1.0, init: 0.0]];
-        input event float panBand4 [[name: "Pan 5", min: -1.0, max: 1.0, init: 0.0]];
-        input event float panBand5 [[name: "Pan 6", min: -1.0, max: 1.0, init: 0.0]];
-        input event float panBand6 [[name: "Pan 7", min: -1.0, max: 1.0, init: 0.0]];
-        input event float panBand7 [[name: "Pan 8", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand0 [[name: "Pan 1", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand1 [[name: "Pan 2", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand2 [[name: "Pan 3", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand3 [[name: "Pan 4", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand4 [[name: "Pan 5", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand5 [[name: "Pan 6", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand6 [[name: "Pan 7", min: -1.0, max: 1.0, init: 0.0]];
+        input value float panBand7 [[name: "Pan 8", min: -1.0, max: 1.0, init: 0.0]];
 
         // amp controls for each band
-        input event float ampBand0 [[name: "Amp 1", min: 0.0, max: 1.0, init: 0.0]];
-        input event float ampBand1 [[name: "Amp 2", min: 0.0, max: 1.0, init: 0.0]];
-        input event float ampBand2 [[name: "Amp 3", min: 0.0, max: 1.0, init: 0.0]];
-        input event float ampBand3 [[name: "Amp 4", min: 0.0, max: 1.0, init: 0.0]];
-        input event float ampBand4 [[name: "Amp 5", min: 0.0, max: 1.0, init: 0.0]];
-        input event float ampBand5 [[name: "Amp 6", min: 0.0, max: 1.0, init: 0.0]];
-        input event float ampBand6 [[name: "Amp 7", min: 0.0, max: 1.0, init: 0.0]];
-        input event float ampBand7 [[name: "Amp 8", min: 0.0, max: 1.0, init: 0.0]];
+        input value float ampBand0 [[name: "Amp 1", min: 0.0, max: 1.0, init: 1.0]];
+        input value float ampBand1 [[name: "Amp 2", min: 0.0, max: 1.0, init: 1.0]];
+        input value float ampBand2 [[name: "Amp 3", min: 0.0, max: 1.0, init: 1.0]];
+        input value float ampBand3 [[name: "Amp 4", min: 0.0, max: 1.0, init: 1.0]];
+        input value float ampBand4 [[name: "Amp 5", min: 0.0, max: 1.0, init: 1.0]];
+        input value float ampBand5 [[name: "Amp 6", min: 0.0, max: 1.0, init: 1.0]];
+        input value float ampBand6 [[name: "Amp 7", min: 0.0, max: 1.0, init: 1.0]];
+        input value float ampBand7 [[name: "Amp 8", min: 0.0, max: 1.0, init: 1.0]];
 
         // 8 panmixers and filters
         node panners = PanMix[8];
 
         node
         {
-            filter0 = BandpassFilter(50.0f);
-            filter1 = BandpassFilter(100.0f);
-            filter2 = BandpassFilter(200.0f);
-            filter3 = BandpassFilter(500.0f);
-            filter4 = BandpassFilter(1000.0f);
-            filter5 = BandpassFilter(2000.0f);
-            filter6 = BandpassFilter(3000.0f);
-            filter7 = BandpassFilter(5000.0f);
+            filter0 = BandpassFilter(61.0f);
+            filter1 = BandpassFilter(115.0f);
+            filter2 = BandpassFilter(218.0f);
+            filter3 = BandpassFilter(411.0f);
+            filter4 = BandpassFilter(777.0f);
+            filter5 = BandpassFilter(1500.0f);
+            filter6 = BandpassFilter(2800.0f);
+            filter7 = BandpassFilter(5200.0f);
         }
 
         // node ampSmoothers = std::smoothing::SmoothedValueStream[8] (0.02f);
@@ -166,24 +166,18 @@ namespace FixedFilterBank
 
     processor PanMix 
     {
-        input event float pan [[name: "Pan", min: -1.0, max: 1.0, init: 0.0]];
-        input event float amp [[name: "Amp", min: 0.0, max: 1.0, init: 1.0]];
+        input value float pan [[name: "Pan", min: -1.0, max: 1.0, init: 0.0]];
+        input value float amp [[name: "Amp", min: 0.0, max: 1.0, init: 1.0]];
 
         input stream float<2> in;
         output stream float<2> out;
-
-        float panAmount;
-        float ampAmount;
-
-        event pan(float p) {panAmount = p;}
-        event amp(float a) {ampAmount = a;}
 
         void main()
         {
             loop
             {
-                float<2> gains = std::pan_law::linear (panAmount);
-                out <- float<2> (in[0] * gains[0] * ampAmount, in[1] * gains[1] * ampAmount);
+                float<2> gains = std::pan_law::linear (pan);
+                out <- float<2> (in[0] * gains[0] * amp, in[1] * gains[1] * amp);
                 advance();
             }
         }

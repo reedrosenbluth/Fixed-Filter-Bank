@@ -1,11 +1,57 @@
 .freq-slider {
-  height: 100%;
-  width: 20px;
-  margin: 0;
-  -webkit-appearance: slider-vertical;
-  -moz-appearance: slider-vertical;
-  appearance: slider-vertical;
-  writing-mode: bt-lr;
-  -webkit-writing-mode: bt-lr;
-  -ms-writing-mode: bt-lr;
+  appearance: none;
+  position: absolute;
+  bottom: 30px;
+  width: 40%;
+  transform: rotate(-90deg);
+  transform-origin: left bottom;
+  border-radius: 2px;
+  background: #c7c7c7;
+  opacity: 0.5;
+}
+
+.freq-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 25px;
+  border-radius: 10%;
+  background: black;
+}
+
+.freq-slider::-moz-slider-thumb {
+  -moz-appearance: none;
+  appearance: none;
+  width: 1px;
+  height: 25px;
+  border-radius: 10%;
+  background: black;
+}
+
+.pan-slider {
+  appearance: none;
+  position: absolute;
+  background: #c7c7c7;
+  opacity: 0.5;
+  top: -480px;
+  left: -32px;
+  width: 40px;
+}
+
+.pan-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 5px;
+  height: 15px;
+  border-radius: 10%;
+  background: black;
+}
+
+.pan-slider::-moz-slider-thumb {
+  -moz-appearance: none;
+  appearance: none;
+  width: 5px;
+  height: 15px;
+  border-radius: 10%;
+  background: black;
 }

@@ -16,4 +16,4 @@
 
 ### Usage
 
-The project's GUI does not currently have controls for filter bank panning and amplitude, but rather serves as a visualizer. However, these controls should be exposed via the Cmajor VST/AU plugin.
+The project's GUI does not currently have controls for filter bank panning and amplitude, it simply serves as a visualizer. These controls should be exposed via the Cmajor VST/AU plugin.
