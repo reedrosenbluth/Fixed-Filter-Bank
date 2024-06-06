@@ -1,5 +1,7 @@
 # Fixed Filter Bank
 
+![screenshot](screenshot.png)
+
 ### How to run as a VST (recommended)
 
 1. Install the Cmajor VST/AU plugin: https://github.com/cmajor-lang/cmajor/releases
@@ -12,7 +14,6 @@
 2. Install the Cmajor VSCode plugin https://marketplace.visualstudio.com/items?itemName=CmajorSoftware.cmajor-tools
 3. Open FFB.cmajor in VSCode
 4. Open the VSCode command pallette `cmd-shift-P` and run the command `Cmajor: Run Patch`
-5. You can switch between the custom GUI (spectrogram) and the generated GUI that has controls for filter bank panning and amplitude.
 
 ### Usage
 
