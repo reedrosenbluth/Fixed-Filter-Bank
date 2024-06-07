@@ -9,24 +9,17 @@ const SpectrumAnalyzer = ({
   amps,
 }) => {
   const canvasRef = useRef(null);
-  const lastFrameRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    ctx.textRendering = "geometricPrecision";
-    ctx.imageSmoothingEnabled = true;
 
     const drawSpectrum = (fftData) => {
       const width = canvas.width;
       const height = canvas.height;
       const barWidth = width / (frequencyIntervals.length - 1);
 
-      if (!lastFrameRef.current) {
-        lastFrameRef.current = ctx.getImageData(0, 0, width, height);
-      }
-
-      ctx.putImageData(lastFrameRef.current, 0, 0);
+      ctx.clearRect(0, 0, width, height);
       ctx.globalAlpha = 0.9;
       ctx.fillStyle = "#A0A0A0";
       ctx.fillRect(0, 0, width, height);
@@ -37,8 +30,7 @@ const SpectrumAnalyzer = ({
       ctx.beginPath();
       ctx.moveTo(0, height);
 
-      for (let i = 0; i < frequencyIntervals.length - 1; i++) {
-        const startFreq = frequencyIntervals[i];
+      frequencyIntervals.slice(0, -1).forEach((startFreq, i) => {
         const endFreq = frequencyIntervals[i + 1];
         const startIndex = Math.floor(
           (startFreq / (sampleRate / 2)) * fftData.length
@@ -57,12 +49,10 @@ const SpectrumAnalyzer = ({
 
           ctx.lineTo(x, y);
         }
-      }
+      });
 
       ctx.lineTo(width, height);
       ctx.stroke();
-
-      lastFrameRef.current = ctx.getImageData(0, 0, width, height);
     };
 
     const drawFrequencyLabels = () => {
@@ -75,13 +65,10 @@ const SpectrumAnalyzer = ({
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
-      for (let i = 0; i < frequencyIntervals.length; i++) {
-        const labelText = `${frequencyIntervals[i]}`;
+      frequencyIntervals.forEach((freq, i) => {
         const labelX = i * labelWidth + 30;
-        const labelY = height - 30;
-
-        ctx.fillText(labelText, labelX, labelY);
-      }
+        ctx.fillText(freq, labelX, height - 30);
+      });
     };
 
     drawSpectrum(fftData);
@@ -109,8 +96,8 @@ export default function View({ patchConnection }) {
   ];
   const filterFreqs = [61, 115, 218, 411, 777, 1500, 2800, 5200];
 
-  const [amps, setAmps] = useState([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
-  const [pans, setPans] = useState([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+  const [amps, setAmps] = useState(Array(8).fill(0.0));
+  const [pans, setPans] = useState(Array(8).fill(0.0));
 
   useEffect(() => {
     const handleDftOut = (event) => {
